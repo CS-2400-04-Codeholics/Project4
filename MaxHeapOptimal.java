@@ -113,4 +113,5 @@ int popped = Heap[FRONT];
 Heap[FRONT] = Heap[size--];
 maxHeapify(FRONT);
 return popped;
+  }
 }
