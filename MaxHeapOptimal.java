@@ -1,117 +1,57 @@
-public class MaxHeapOptimal
-{
-private int[] Heap;
-private int size;
-private int maxsize;
-private int swapCount;
 
-private static final int FRONT = 1;
+public class Heap {
+    private int size;
+    private int[] arr;
+    public Heap(){
 
-public MaxHeap(int maxsize)
-{
-this.maxsize = maxsize;
-this.size = 0;
-Heap = new int[this.maxsize + 1];
-Heap[0] = Integer.MAX_VALUE;
-swapCount = 0;
-}
-
-private int parent(int pos)
-{
-return pos / 2;
-}
-
-private int leftChild(int pos)
-{
-return (2 * pos);
-}
-
-private int rightChild(int pos)
-{
-return (2 * pos) + 1;
-}
-
-private boolean isLeaf(int pos)
-{
-if (pos >= (size / 2) && pos <= size)
-{
-return true;
-}
-return false;
-}
-
-private void swap(int fpos,int spos)
-{
-int tmp;
-tmp = Heap[fpos];
-Heap[fpos] = Heap[spos];
-Heap[spos] = tmp;
-swapCount++;
-}
-
-private void maxHeapify(int pos)
-{
-if (!isLeaf(pos))
-{
-if ( Heap[pos] < Heap[leftChild(pos)] || Heap[pos] < Heap[rightChild(pos)])
-{
-if (Heap[leftChild(pos)] > Heap[rightChild(pos)])
-{
-swap(pos, leftChild(pos));
-maxHeapify(leftChild(pos));
-}else
-{
-swap(pos, rightChild(pos));
-maxHeapify(rightChild(pos));
-                }
-            }
+    }
+    //buidHeap method that works in O(n) time
+    public void buildHeap(int[] ar){
+        this.size = ar.length;
+        this.arr = new int[size];
+        for(int i=0;i<ar.length;i++)
+            this.arr[i] = ar[i];
+        for(int i=(this.arr.length)/2;i>=0;i--){
+            this.heapify(i);
         }
     }
+    //max-heapify method
+    public void heapify(int i){
+        int largest = i;
+        if(((2*i)+1)<size && this.arr[(2*i)+1]>this.arr[largest])
+            largest = ((2*i)+1);
+        if(((2*i)+2)<size && this.arr[(2*i)+2]>this.arr[largest])
+            largest = ((2*i)+2);
+        if(largest != i){
+            int temp = this.arr[i];
+            this.arr[i] = this.arr[largest];
+            this.arr[largest] = temp;
+            this.heapify(largest);
+        }
+    }
+    public void insert(int num){
 
-public void insert(int element)
-{
-int c=0;
-for(int i=0;i<Heap.length;i++){
-if(Heap[i]==element)
-c=1;
-}
-if(c==1){
-System.out.println("Duplicate item found,can't insert into heap");
-return;
-}
-Heap[++size] = element;
-int current = size;
-
-while(Heap[current] > Heap[parent(current)])
-{
-swap(current,parent(current));
-current = parent(current);
-}
-maxHeap();
-}
-
-public void print()
-{
-for (int i = 1; i <= size / 2; i++ )
-{
-System.out.print(" PARENT : " + Heap[i] + " LEFT CHILD : " + Heap[2*i] + " RIGHT CHILD :" + Heap[2 * i + 1]);
-System.out.println();
-}
-}
-
-public void maxHeap()
-{
-for (int pos = (size / 2); pos >= 1; pos--)
-{
-maxHeapify(pos);
-}
-}
-
-public int remove()
-{
-int popped = Heap[FRONT];
-Heap[FRONT] = Heap[size--];
-maxHeapify(FRONT);
-return popped;
-  }
+    }
+    //method to remove max element from max-heap
+    public int remove(){
+        if(this.size<1)
+            return -1;
+        int temp = this.arr[0];
+        this.arr[0] = this.arr[size-1];
+        this.arr[size-1] = temp;
+        size--;
+        return this.arr[size];
+    }
+    //method to print elements of max heap in output file
+    public void printHeap(String filename){
+        try {
+            File file = new File(filename);
+            FileWriter writer = new FileWriter(file);
+            for (int i = 0; i < this.arr.length; i++)
+                writer.write(this.arr[i] + "\n");
+            writer.close();
+        }catch (IOException e){
+            System.out.println("Error while writing");
+        }
+    }
 }
