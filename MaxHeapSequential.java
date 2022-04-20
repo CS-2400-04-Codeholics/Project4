@@ -1,60 +1,182 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.Scanner;
 
-public class MaxHeapOptimal {
-    private int size;
-    private int[] arr;
-    public Heap(){
+public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHeapInterface<T>
+{
+    private T[] heap;
+    private int lastIndex;
+    private boolean initialized;
+    private int swaps;
+    private static final int DEFAULT_CAPACITY = 25;
+    private static final int MAX_CAPACITY = 10000;
 
+    public MaxHeapSequential()
+    {
+        this(DEFAULT_CAPACITY);
     }
-    //buidHeap method that works in optimal 
-    public void buildHeap(int[] ar){
-        this.size = ar.length;
-        this.arr = new int[size];
-        for(int i=0;i<ar.length;i++)
-            this.arr[i] = ar[i];
-        for(int i=(this.arr.length)/2;i>=0;i--){
-            this.heapify(i);
+
+    public MaxHeapSequential(int initialCapacity)
+    {
+        if (initialCapacity < DEFAULT_CAPACITY)
+        {
+            initialCapacity = DEFAULT_CAPACITY;
+        }
+        else
+        {
+            checkCapacity(initialCapacity);
+        }
+
+        @SuppressWarnings("unchecked")
+        T[] tempHeap =  (T[]) new Comparable[initialCapacity + 1];
+        heap = tempHeap;
+        lastIndex = 0;
+        initialized = true;
+    }
+
+    private void checkCapacity(int capacity)
+    {
+        if (capacity > MAX_CAPACITY)
+        {
+            throw new IllegalStateException("Cannot have a heap exceeding " + MAX_CAPACITY + " entries.");
         }
     }
-    //max-heapify method
-    public void heapify(int i){
-        int largest = i;
-        if(((2*i)+1)<size && this.arr[(2*i)+1]>this.arr[largest])
-            largest = ((2*i)+1);
-        if(((2*i)+2)<size && this.arr[(2*i)+2]>this.arr[largest])
-            largest = ((2*i)+2);
-        if(largest != i){
-            int temp = this.arr[i];
-            this.arr[i] = this.arr[largest];
-            this.arr[largest] = temp;
-            this.heapify(largest);
+
+    private void checkInitialization()
+    {
+        if (!initialized)
+        {
+            throw new IllegalStateException("Heap has not initialized properly.");
         }
     }
-    public void insert(int num){
+
+    @Override
+    public void add(T newEntry)
+    {
+        checkInitialization();
+        int newIndex = lastIndex + 1;
+        int parentIndex = newIndex / 2;
+        while ((parentIndex > 0) && newEntry.compareTo(heap[parentIndex]) > 0)
+        {
+            heap[newIndex] = heap[parentIndex];
+            newIndex = parentIndex;
+            parentIndex = newIndex / 2;
+            swaps++;
+        }
+        heap[newIndex] = newEntry;
+        lastIndex++;
+        checkCapacity(lastIndex);
+    }
+
+    public T remove(int entry)
+    {
+        checkInitialization();
+        T node = null;
+        if (!isEmpty())
+        {
+            node = heap[entry];
+            heap[entry] = heap[lastIndex];
+            lastIndex--;
+            reheap(entry);
+        }
+        return node;
+    }
+
+    @Override
+    public T removeMax()
+    {
+        checkInitialization();
+        T root = null;
+        if (!isEmpty())
+        {
+            root = heap[1];
+            heap[1] = heap[lastIndex];
+            lastIndex--;
+            reheap(1);
+        }
+        return root;
+    }
+
+    private void reheap(int index)
+    {
+        boolean done = false;
+        T orphan = heap[index];
+        int leftChildIndex = 2 * index;
+        while (!done && (leftChildIndex <= lastIndex))
+        {
+            int largerChildIndex = leftChildIndex;
+            int rightChildIndex = leftChildIndex + 1;
+            if ((rightChildIndex <= lastIndex) && heap[rightChildIndex].compareTo(heap[largerChildIndex]) > 0)
+            {
+                largerChildIndex = rightChildIndex;
+            }
+
+            if (orphan.compareTo(heap[largerChildIndex]) < 0)
+            {
+                heap[index] = heap[largerChildIndex];
+                index = largerChildIndex;
+                leftChildIndex = 2 * index;
+            }
+            else
+            {
+                done = true;
+            }
+        }
+        heap[index] = orphan;
+    }
+
+    @Override
+    public T getMax()
+    {
+        checkInitialization();
+        T root = null;
+        if (!isEmpty())
+        {
+            root = heap[1];
+        }
+        return root;
+    }
+
+    @Override
+    public boolean isEmpty()
+    {
+        return lastIndex < 1;
+    }
+
+    @Override
+    public int getSize()
+    {
+        return lastIndex;
+    }
+
+    @Override
+    public void clear()
+    {
+        checkInitialization();
+        while (lastIndex > -1)
+        {
+            heap[lastIndex] = null;
+            lastIndex--;
+        }
+        lastIndex = 0;
+    }
+
+    public int getSwaps()
+    {
+        return swaps;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void read(String fileName) throws FileNotFoundException
+    {
+        File file = new File(fileName);
+        Scanner inputFile = new Scanner(file);
+        MaxHeapSequential<Integer> intHeap = (MaxHeapSequential<Integer>) this;
+        while (inputFile.hasNext())
+        {
+            intHeap.add(inputFile.nextInt());
+        }
 
     }
-    //method to remove max element from max-heap
-    public int remove(){
-        if(this.size<1)
-            return -1;
-        int temp = this.arr[0];
-        this.arr[0] = this.arr[size-1];
-        this.arr[size-1] = temp;
-        size--;
-        return this.arr[size];
-    }
-    //method to print elements of max heap in output file
-    public void printHeap(String filename){
-        try {
-            File file = new File(filename);
-            FileWriter writer = new FileWriter(file);
-            for (int i = 0; i < this.arr.length; i++)
-                writer.write(this.arr[i] + "\n");
-            writer.close();
-        }catch (IOException e){
-            System.out.println("Error while writing");
-        }
-    }
+
+
 }
