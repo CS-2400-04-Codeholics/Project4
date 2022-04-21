@@ -1,17 +1,29 @@
-import java.util.Arrays;
+import java.io.*;
+import java.util.Scanner;
 
-public class MaxHeapOptimal<T extends Comparable<? super T>> implements MaxHeapInterface<T>
+public class MaxHeapOptimal
 {
-    private T[] heap;
+    private int[] heap;
     private int lastIndex;
     private boolean initialized;
     private int swaps;
     private static final int DEFAULT_CAPACITY = 25;
     private static final int MAX_CAPACITY = 10000;
 
-    public MaxHeapOptimal()
+    public MaxHeapOptimal(int[] entries)
     {
-        this(DEFAULT_CAPACITY);
+        this(entries.length);
+        lastIndex = entries.length;
+        assert initialized = true;
+        for (int index = 0; index < entries.length; index++)
+        {
+            heap[index + 1] = entries[index];
+        }
+
+        for (int rootIndex = lastIndex / 2; rootIndex > 0; rootIndex--)
+        {
+            reheap(rootIndex);
+        }
     }
 
     public MaxHeapOptimal(int initialCapacity)
@@ -25,9 +37,8 @@ public class MaxHeapOptimal<T extends Comparable<? super T>> implements MaxHeapI
             checkCapacity(initialCapacity);
         }
 
-        @SuppressWarnings("unchecked")
-        T[] tempHeap =  (T[]) new Comparable[initialCapacity + 1];
-        heap = tempHeap;
+
+        heap = new int[initialCapacity + 1];
         lastIndex = 0;
         initialized = true;
     }
@@ -48,37 +59,41 @@ public class MaxHeapOptimal<T extends Comparable<? super T>> implements MaxHeapI
         }
     }
 
-    private void ensureCapacity()
-    {
-        if(lastIndex >= heap.length -1)
-        {
-            int newLength = 1 + heap.length;
-            checkCapacity(newLength);
-            heap = Arrays.copyOf(heap, newLength);
-        }
-    }
-
-    @Override
-    public void add(T newEntry)
-	{
-		checkInitialization();
-		ensureCapacity();
-		heap[lastIndex + 1] = newEntry;
-		lastIndex++;
-	}
-	
-	public void optimal() 
-	{
-		checkInitialization();
-		for(int rootIndex = lastIndex / 2; rootIndex > 0; rootIndex--)
-			reheap(rootIndex);
-	}
-
-    @Override
-    public T removeMax()
+    public void add(int newEntry)
     {
         checkInitialization();
-        T root = null;
+        int newIndex = lastIndex + 1;
+        int parentIndex = newIndex / 2;
+        while ((parentIndex > 0) && newEntry > heap[parentIndex])
+        {
+            heap[newIndex] = heap[parentIndex];
+            newIndex = parentIndex;
+            parentIndex = newIndex / 2;
+            swaps++;
+        }
+        heap[newIndex] = newEntry;
+        lastIndex++;
+        checkCapacity(lastIndex);
+    }
+
+    public int remove(int entry)
+    {
+        checkInitialization();
+        int node = 0;
+        if (!isEmpty())
+        {
+            node = heap[entry];
+            heap[entry] = heap[lastIndex];
+            lastIndex--;
+            reheap(entry);
+        }
+        return node;
+    }
+
+    public int removeMax()
+    {
+        checkInitialization();
+        int root = 0;
         if (!isEmpty())
         {
             root = heap[1];
@@ -92,21 +107,20 @@ public class MaxHeapOptimal<T extends Comparable<? super T>> implements MaxHeapI
     private void reheap(int index)
     {
         boolean done = false;
-        T orphan = heap[index];
+        int orphan = heap[index];
         int leftChildIndex = 2 * index;
         while (!done && (leftChildIndex <= lastIndex))
         {
             int largerChildIndex = leftChildIndex;
             int rightChildIndex = leftChildIndex + 1;
-            if ((rightChildIndex <= lastIndex) && heap[rightChildIndex].compareTo(heap[largerChildIndex]) > 0)
+            if ((rightChildIndex <= lastIndex) && heap[rightChildIndex] > heap[largerChildIndex])
             {
                 largerChildIndex = rightChildIndex;
             }
 
-            if (orphan.compareTo(heap[largerChildIndex]) < 0)
+            if (orphan < heap[largerChildIndex])
             {
                 heap[index] = heap[largerChildIndex];
-                swaps++;
                 index = largerChildIndex;
                 leftChildIndex = 2 * index;
             }
@@ -114,16 +128,15 @@ public class MaxHeapOptimal<T extends Comparable<? super T>> implements MaxHeapI
             {
                 done = true;
             }
+            swaps++;
         }
         heap[index] = orphan;
-        swaps++;
     }
 
-    @Override
-    public T getMax()
+    public int getMax()
     {
         checkInitialization();
-        T root = null;
+        int root = 0;
         if (!isEmpty())
         {
             root = heap[1];
@@ -131,42 +144,58 @@ public class MaxHeapOptimal<T extends Comparable<? super T>> implements MaxHeapI
         return root;
     }
 
-    @Override
     public boolean isEmpty()
     {
         return lastIndex < 1;
     }
 
-    @Override
     public int getSize()
     {
         return lastIndex;
     }
 
-    @Override
     public void clear()
     {
         checkInitialization();
         while (lastIndex > -1)
         {
-            heap[lastIndex] = null;
+            heap[lastIndex] = 0;
             lastIndex--;
         }
         lastIndex = 0;
     }
 
-    public void printSwaps()
+    public int getSwaps()
     {
-        System.out.println(swaps);
+        return swaps;
+    }
+
+    public void read(String fileName) throws FileNotFoundException
+    {
+        File file = new File(fileName);
+        Scanner inputFile = new Scanner(file);
+        MaxHeapOptimal intHeap = this;
+        while (inputFile.hasNext())
+        {
+            intHeap.add(inputFile.nextInt());
+        }
+
     }
 
     public void printMax()
     {
         for(int i = 0; i < 10; i++)
         {
-            System.out.print(heap[i + 1] + ",");    
+            System.out.print(heap[i + 1] + ",");
         }
         System.out.println("...");
     }
 
+    public void removeMaxTen()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            this.removeMax();
+        }
+    }
 }

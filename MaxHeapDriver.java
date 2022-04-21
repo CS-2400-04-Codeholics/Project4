@@ -1,100 +1,76 @@
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.util.Scanner;
 
 public class MaxHeapDriver
 {
-    public static void main(String[] args) throws IOException
+    public static void main(String[] args) throws FileNotFoundException
     {
+        File file1 = new File("src/data_sorted.txt");
+        Scanner inputFile1 = new Scanner(file1);
+        File file2 = new File("src/data_random.txt");
+        Scanner inputFile2 = new Scanner(file2);
+
         File outputFile = new File("data_output.txt");
         PrintStream stream = new PrintStream(outputFile);
-        System.out.println("Check 'data_output.txt' to see results.");
         System.setOut(stream);
 
-        File randomInputS = new File("data_random.txt");	
-		FileReader randomfrS = new FileReader(randomInputS);
-		try (BufferedReader randombrS = new BufferedReader(randomfrS)) {
-            MaxHeapSequential<String> heap1 = new MaxHeapSequential<>();
-            String line1;
-            System.out.println("Random:");
-            while((line1 = randombrS.readLine()) != null)
-            {
-                heap1.add(line1);
-            }
-            System.out.print("Heap built using sequential insertions: ");
-            heap1.printMax();
-            System.out.print("Number of swaps in the heap creation: ");
-            heap1.printSwaps();
-            for(int i = 0; i < 10; i++)
-            {
-                heap1.removeMax();
-            }
-            System.out.print("Heap after 10 removals: ");
-            heap1.printMax();
+        int[] array1 = new int[101];
+        int[] array2 = new int[101];
+        int i = 1;
+        int j = 1;
+
+        while (inputFile1.hasNext())
+        {
+            array1[i] = inputFile1.nextInt();
+            i++;
         }
 
-        File randomInputO = new File("data_random.txt");	
-		FileReader randomfrO = new FileReader(randomInputO);
-		try (BufferedReader randombrO = new BufferedReader(randomfrO)) {
-            MaxHeapOptimal<String> heap2 = new MaxHeapOptimal<>();
-            String line2;
-            while((line2 = randombrO.readLine()) != null)
-            {
-                heap2.add(line2);
-            }
-            heap2.optimal();
-            System.out.print("\nHeap built using optimal insertions: ");
-            heap2.printMax();
-            System.out.print("Number of swaps in the heap creation: ");
-            heap2.printSwaps();
-            for(int i = 0; i < 10; i++)
-            {
-                heap2.removeMax();
-            }
-            System.out.print("Heap after 10 removals: ");
-            heap2.printMax();
+        while (inputFile2.hasNext())
+        {
+            array2[j] = inputFile2.nextInt();
+            j++;
         }
 
-        File sortedInputS = new File("data_sorted.txt");	
-		FileReader sortedfrS = new FileReader(sortedInputS);
-		try (BufferedReader sortedbrS = new BufferedReader(sortedfrS)) {
-            MaxHeapSequential<String> heap3 = new MaxHeapSequential<>();
-            String line3;
-            System.out.println("\nSorted:");
-            while((line3 = sortedbrS.readLine()) != null)
-            {
-                heap3.add(line3);
-            }
-            System.out.print("Heap built using sequential insertions: ");
-            heap3.printMax();
-            System.out.print("Number of swaps in the heap creation: ");
-            heap3.printSwaps();
-            for(int i = 0; i < 10; i++)
-            {
-                heap3.removeMax();
-            }
-            System.out.print("Heap after 10 removals: ");
-            heap3.printMax();
+        MaxHeapSequential<Integer> dataHeapSequentialSorted = new MaxHeapSequential<>(100);
+        MaxHeapSequential<Integer> dataHeapSequentialRandom = new MaxHeapSequential<>(100);
+        MaxHeapOptimal dataHeapOptimalSorted = new MaxHeapOptimal(array1);
+        MaxHeapOptimal dataHeapOptimalRandom = new MaxHeapOptimal(array2);
 
-        File sortedInputO = new File("data_sorted.txt");	
-        FileReader sortedfrO = new FileReader(sortedInputO);
-        try (BufferedReader sortedbrO = new BufferedReader(sortedfrO)) {
-            MaxHeapOptimal<String> heap4 = new MaxHeapOptimal<>();
-            String line4;
-            while((line4 = sortedbrO.readLine()) != null)
-            {
-                heap4.add(line4);
-            }
-            heap4.optimal();
-            System.out.print("\nHeap built using optimal insertions: ");
-            heap4.printMax();
-            System.out.print("Number of swaps in the heap creation: ");
-            heap4.printSwaps();
-            for(int i = 0; i < 10; i++)
-            {
-                heap4.removeMax();
-            }
-            System.out.print("Heap after 10 removals: ");
-            heap4.printMax();
-            }
-        }
+        dataHeapSequentialSorted.read("src/data_sorted.txt");
+        dataHeapSequentialRandom.read("src/data_random.txt");
+
+        System.out.println("SORTED:");
+        System.out.print("Heap built using sequential insertions: ");
+        dataHeapSequentialSorted.printMax();
+        System.out.println("Number of swaps used in the heap creation: " + dataHeapSequentialSorted.getSwaps());
+        System.out.print("Heap after 10 removals: ");
+        dataHeapSequentialSorted.removeMaxTen();
+        dataHeapSequentialSorted.printMax();
+
+        System.out.print("\nHeap built using optimal method: ");
+        dataHeapOptimalSorted.printMax();
+        System.out.println("Number of swaps used in the heap creation: " + dataHeapOptimalSorted.getSwaps());
+        System.out.print("Heap after 10 removals: ");
+        dataHeapOptimalSorted.removeMaxTen();
+        dataHeapOptimalSorted.printMax();
+
+        System.out.println("\n============================================================================================\n");
+
+        System.out.println("RANDOM:");
+        System.out.print("Heap built using sequential insertions: ");
+        dataHeapSequentialRandom.printMax();
+        System.out.println("Number of swaps used in the heap creation: " + dataHeapSequentialRandom.getSwaps());
+        System.out.print("Heap after 10 removals: ");
+        dataHeapSequentialRandom.removeMaxTen();
+        dataHeapSequentialRandom.printMax();
+
+        System.out.print("\nHeap built using optimal method: ");
+        dataHeapOptimalRandom.printMax();
+        System.out.println("Number of swaps used in the heap creation: " + dataHeapOptimalRandom.getSwaps());
+        System.out.print("Heap after 10 removals: ");
+        dataHeapOptimalRandom.removeMaxTen();
+        dataHeapOptimalRandom.printMax();
     }
 }
