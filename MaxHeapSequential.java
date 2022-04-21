@@ -1,4 +1,5 @@
-import java.util.Arrays;
+import java.io.*;
+import java.util.Scanner;
 
 public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHeapInterface<T>
 {
@@ -48,16 +49,6 @@ public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHe
         }
     }
 
-    private void ensureCapacity()
-    {
-        if(lastIndex >= heap.length -1)
-        {
-            int newLength = 1 + heap.length;
-            checkCapacity(newLength);
-            heap = Arrays.copyOf(heap, newLength);
-        }
-    }
-
     @Override
     public void add(T newEntry)
     {
@@ -69,11 +60,25 @@ public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHe
             heap[newIndex] = heap[parentIndex];
             newIndex = parentIndex;
             parentIndex = newIndex / 2;
+            swaps++;
         }
         heap[newIndex] = newEntry;
         lastIndex++;
-        swaps++;
-        ensureCapacity();
+        checkCapacity(lastIndex);
+    }
+
+    public T remove(int entry)
+    {
+        checkInitialization();
+        T node = null;
+        if (!isEmpty())
+        {
+            node = heap[entry];
+            heap[entry] = heap[lastIndex];
+            lastIndex--;
+            reheap(entry);
+        }
+        return node;
     }
 
     @Override
@@ -155,18 +160,38 @@ public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHe
         lastIndex = 0;
     }
 
-    public void printSwaps()
+    public int getSwaps()
     {
-        System.out.println(swaps);
+        return swaps;
+    }
+
+    @SuppressWarnings("unchecked")
+    public void read(String fileName) throws FileNotFoundException
+    {
+        File file = new File(fileName);
+        Scanner inputFile = new Scanner(file);
+        MaxHeapSequential<Integer> intHeap = (MaxHeapSequential<Integer>) this;
+        while (inputFile.hasNext())
+        {
+            intHeap.add(inputFile.nextInt());
+        }
+
     }
 
     public void printMax()
     {
         for(int i = 0; i < 10; i++)
         {
-            System.out.print(heap[i + 1] + ",");    
+            System.out.print(heap[i + 1] + ",");
         }
         System.out.println("...");
     }
 
+    public void removeMaxTen()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            this.removeMax();
+        }
+    }
 }
