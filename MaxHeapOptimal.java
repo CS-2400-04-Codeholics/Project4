@@ -5,7 +5,7 @@ public class Heap {
     public Heap(){
 
     }
-    //buidHeap method that works in O(n) time
+    //buidHeap method that works in optimal time "smart way"
     public void buildHeap(int[] ar){
         this.size = ar.length;
         this.arr = new int[size];
