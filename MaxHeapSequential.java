@@ -1,5 +1,4 @@
-import java.io.*;
-import java.util.Scanner;
+import java.util.Arrays;
 
 public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHeapInterface<T>
 {
@@ -49,6 +48,16 @@ public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHe
         }
     }
 
+    private void ensureCapacity()
+    {
+        if(lastIndex >= heap.length -1)
+        {
+            int newLength = 1 + heap.length;
+            checkCapacity(newLength);
+            heap = Arrays.copyOf(heap, newLength);
+        }
+    }
+
     @Override
     public void add(T newEntry)
     {
@@ -60,25 +69,11 @@ public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHe
             heap[newIndex] = heap[parentIndex];
             newIndex = parentIndex;
             parentIndex = newIndex / 2;
-            swaps++;
         }
         heap[newIndex] = newEntry;
         lastIndex++;
-        checkCapacity(lastIndex);
-    }
-
-    public T remove(int entry)
-    {
-        checkInitialization();
-        T node = null;
-        if (!isEmpty())
-        {
-            node = heap[entry];
-            heap[entry] = heap[lastIndex];
-            lastIndex--;
-            reheap(entry);
-        }
-        return node;
+        swaps++;
+        ensureCapacity();
     }
 
     @Override
@@ -160,23 +155,18 @@ public class MaxHeapSequential<T extends Comparable<? super T>> implements MaxHe
         lastIndex = 0;
     }
 
-    public int getSwaps()
+    public void printSwaps()
     {
-        return swaps;
+        System.out.println(swaps);
     }
 
-    @SuppressWarnings("unchecked")
-    public void read(String fileName) throws FileNotFoundException
+    public void printMax()
     {
-        File file = new File(fileName);
-        Scanner inputFile = new Scanner(file);
-        MaxHeapSequential<Integer> intHeap = (MaxHeapSequential<Integer>) this;
-        while (inputFile.hasNext())
+        for(int i = 0; i < 10; i++)
         {
-            intHeap.add(inputFile.nextInt());
+            System.out.print(heap[i + 1] + ",");    
         }
-
+        System.out.println("...");
     }
-
 
 }
